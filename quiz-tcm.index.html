@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz TCM - Veronica D'Ercole</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --unipol-dark: #0f3250; 
+            --unipol-blue: #526c82;
+            --premium-red: #bf0f1a;
+        }
+        body {
+            background-color: var(--unipol-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .slide {
+            display: none;
+            min-height: 100vh;
+            width: 100vw;
+            padding: 2rem;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .slide.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 1.2rem 1.5rem;
+            margin: 0.6rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            text-align: left;
+            font-weight: 500;
+        }
+        .btn-option:hover {
+            background: var(--unipol-blue);
+            border-color: white;
+            transform: translateX(10px);
+        }
+        .tip-container {
+            background: white;
+            color: #0f3250;
+            padding: 2.5rem;
+            border-radius: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--unipol-blue), #60a5fa);
+            transition: width 0.4s ease;
+            z-index: 50;
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .profile-card {
+            background: white;
+            color: #0f3250;
+            padding: 2.5rem;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+
+<div class="slide active" id="slide-0">
+    <div class="mb-8">
+        <i class="fas fa-crown text-7xl text-yellow-400 mb-4 animate-bounce"></i>
+    </div>
+    <h1 class="text-3xl md:text-5xl font-extrabold mb-6">La tua vita è un abbonamento <br><span style="color:var(--premium-red)">PREMIUM</span> o una versione <span style="color:#339547">FREE</span>?</h1>
+    <p class="text-xl opacity-90 mb-10">Scoprilo subito!</p>
+    <button onclick="nextSlide()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-5 px-12 rounded-full transition-all hover:scale-110 shadow-xl">
+        VAI! ✨
+    </button>
+</div>
+
+<div id="quiz-flow-container"></div>
+
+<div class="slide" id="slide-loading">
+    <div class="loader mb-6"></div>
+    <h5 class="text-2xl font-bold">Analizzando il tuo lifestyle... ✨</h5>
+    <p class="opacity-60 italic">Chiedendo al gatto cosa ha ascoltato ieri...</p>
+</div>
+
+<div class="slide overflow-y-auto pt-10 pb-10" id="slide-result">
+    <div class="profile-card text-center">
+        <div id="profile-icon" class="text-7xl mb-4"></div>
+        <h2 class="text-sm font-bold uppercase tracking-widest mb-2 opacity-60 text-blue-500">Il tuo profilo è:</h2>
+        <h3 id="profile-title" class="text-3xl font-black mb-4 uppercase leading-tight">...</h3>
+        <p id="profile-desc" class="mb-6 leading-relaxed text-gray-700 italic">...</p>
+    </div>
+
+    <div class="bg-white text-blue-900 p-8 rounded-3xl shadow-2xl max-w-md w-full mb-8 border-t-8 border-[#339547]">
+        <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4 shadow-inner">
+                <i class="fas fa-user-tie text-2xl text-blue-600"></i>
+            </div>
+            <div class="text-left">
+                <h4 class="font-bold text-xl leading-tight">Veronica D'Ercole</h4>
+                <p class="text-sm text-[#339547] font-semibold">Consulente Assicurativo Unipol</p>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 p-5 rounded-2xl mb-6 text-left border-l-4 border-blue-500">
+            <p id="ai-advice" class="text-sm text-gray-800 leading-snug font-medium">...</p>
+        </div>
+
+        <form id="contact-form" class="space-y-4">
+            <input type="hidden" id="hidden-result" name="profilo_risultato">
+            
+            <input type="text" id="nome" name="nome" placeholder="Il tuo nome" required class="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="contatto" name="contatto" placeholder="WhatsApp o Mail" required class="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+            <button type="button" id="submit-btn" onclick="sendData()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
+                CONTATTAMI (OFFRO IO IL CAFFÈ ☕)
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="slide" id="slide-success">
+    <i class="fas fa-check-circle text-7xl text-green-400 mb-6"></i>
+    <h2 class="text-3xl font-bold mb-4">Ottimo, a presto!</h2>
+    <p class="opacity-80 px-4">Grazie per aver giocato con me! Ti contatterò il prima possibile per fissare la nostra chiacchierata e bere quel caffè!</p>
+    <button onclick="location.reload()" class="mt-10 text-white underline opacity-60">Ricomincia il quiz</button>
+</div>
+
+<script>
+    let scores = { abbonamenti: 0, saltatore: 0, corvo: 0 };
+    let flowIndex = 0;
+    let userProfile = "";
+
+    const questions = [
+        {
+            q: "Sei giovane, in forma e l'unica cosa che temi è che finisca la batteria del telefono.<br><b style='color: #BAE6FD;'>Perché pensare a una polizza vita ora?</b>",
+            options: [
+                { text: "Perché so che ora costa quanto un Aperol, tra 20 anni quanto una cena stellata.", type: "corvo" },
+                { text: "Quindi questo è un quiz per una polizza vita?!", type: "saltatore" },
+                { text: "Nulla è certo, solo la morte (e le tasse!)", type: "abbonamenti" }
+            ],
+            tip: `<em><b>Tabù della morte?</b></em> Parlarne non porta sfortuna, ma <b><span class="text-[#339547]">bloccare il prezzo</span></b> di una polizza vita (<b><span class="text-[#bb0f1c]">TCM</span></b>) mentre sei giovane è la mossa più intelligente che puoi fare. È un regalo al te stesso del futuro.`
+        },
+        {
+            q: "Nel tuo estratto conto appare ancora il misterioso abbonamento di pilates del 2022:<br><i><b>Paghi 7, prendi 2, dividi per la radice quadrata di ansia.</b></i><br><b style='color: #BAE6FD;'>Perché continui a regalare questi 9,99€ ogni mese?</b>",
+            options: [
+                { text: "Non si sa mai, magari domani mi sveglio atleta", type: "corvo" },
+                { text: "Palestra e Netflix, popcorn e addominali: era tutto in offerta insieme!", type: "abbonamenti" },
+                { text: "NO. Già chiamato il servizio clienti, bruciato la tessera e cambiato Paese. Addio.", type: "saltatore" }
+            ],
+            tip: `<em><b>Lo sapevi?</b></em> Una polizza <b><span class="text-[#bb0f1c]">TCM</span></b> non è un matrimonio. Se tra 10 anni vuoi disdirla, lo fai in un clic. <b><span class="text-[#339547]">Zero penali</span></b>, massima libertà.`
+        },
+        {
+            q: "Hai comprato un set di pittura su Amazon 3 mesi fa e non hai ancora aperto neanche il tubetto di bianco.<br><b style='color: #BAE6FD;'>Ti aspetti un rimborso oggi?</b>",
+            options: [
+                { text: "Pretendo il reso! È intatto, come i miei sogni di gloria artistica.", type: "saltatore" },
+                { text: "No, Van Gogh mi fa un baffo! Pagare per una vena artistica mai arrivata è il mio hobby.", type: "abbonamenti" },
+                { text: "No, conosco le penali: tenerlo a prendere polvere costa meno che spedirlo indietro.", type: "corvo" }
+            ],
+            tip: `<em><b>Spoiler:</b></em> La <b><span class="text-[#bb0f1c]">TCM</span></b> è come l'assicurazione Kasko dello smartphone: <b><span class="text-[#339547]">Paghi poco</span></b> per stare sereno. Se non la usi... beh, meglio così, significa che sei ancora vivo!`
+        },
+        {
+            q: "Parliamo di stile di vita: come tratti i tuoi polmoni (e di riflesso il tuo portafoglio)?<br><b style='color: #BAE6FD;'>Qual è la tua 'aria' quotidiana?</b>",
+            options: [
+                { text: "Aria di montagna, yoga e avocado toast: sono un tempio sacro.", type: "abbonamenti" },
+                { text: "Fumo solo se stressato (ovvero: sempre), ma so che il conto arriverà.", type: "corvo" },
+                { text: "Svapo così tanto che se entro in una stanza scatta l'allarme antincendio.", type: "saltatore" }
+            ],
+            tip: `<em><b>Lo sapevi?</b></em> Se non fumi, il prezzo della tua protezione scende drasticamente. Essere sani <b><span class="text-[#339547]">conviene</span></b> (letteralmente)!`
+        },
+        {
+            q: "Congratulazioni! Hai vinto un biglietto sola andata per Marte <em>all inclusive</em>.<br><b style='color: #BAE6FD;'>A chi lasci in eredità il tuo prezioso piano Spotify?</b>",
+            options: [
+                { text: "Ai figli, sperando che i Queen li educhino meglio di quanto abbia fatto io.", type: "abbonamenti" },
+                { text: "Al mio gatto: è l'unico che apprezza veramente le mie playlist 'Pianto Disperato'.", type: "saltatore" },
+                { text: "Al primo che passa: lo Stato ha già troppi soldi, non avrà anche i miei podcast.", type: "corvo" }
+            ],
+            tip: `<em><b>Nota bene:</b></em> Con la <b><span class="text-[#bb0f1c]">TCM</span></b> il capitale è <b><span class="text-[#339547]">100% esentasse</span></b> e va a chi vuoi <b><span class="text-[#339547]">TU</span></b>. Lo Stato stavolta resta a bocca asciutta.`
+        }
+    ];
+
+    const profiles = {
+        abbonamenti: { title: "Il Re degli Abbonamenti 👑", desc: "Hai sottoscritto ogni forma di intrattenimento esistente, ma il tuo lifestyle 'Premium' ha un bug: manca l'unico che protegga davvero tutto il resto. Te stesso.", advice: "Hai tutto per lo svago, ora pensiamo alla realtà. Aggiungere la protezione vita costa meno del tuo piano family HD!", icon: "💳" },
+        saltatore: { title: "Il Saltatore 🪂", desc: "Adori il rischio e vivi per il brio. Ma ammettiamolo: saltare senza rete è divertente solo nei film, non nella realtà finanziaria.", advice: "Vivi pure al massimo, ma lascia che io sia il tuo 'materasso' invisibile. Una TCM è la rete di sicurezza ideale.", icon: "🏃‍♂️" },
+        corvo: { title: "Il Corvo Curioso 🦅", desc: "Analizzi, confronti e vuoi capire. Hai intuito che la TCM non è un costo inutile, ma un asset strategico per la tua vita.", advice: "La tua curiosità ti ha portato sulla strada giusta. Parliamone: ho le soluzioni che servono per chiudere il cerchio.", icon: "🧐" }
+    };
+
+    function initQuiz() {
+        const container = document.getElementById('quiz-flow-container');
+        container.innerHTML = "";
+        questions.forEach((item, index) => {
+            const qS = document.createElement('div'); qS.id = `q-slide-${index+1}`; qS.className = `slide`;
+            qS.innerHTML = `<div class="max-w-md w-full"><h3 class="text-2xl font-bold mb-10">${item.q}</h3><div class="flex flex-col w-full items-center">${item.options.map(o => `<button onclick="handleAnswer('${o.type}')" class="btn-option">${o.text}</button>`).join('')}</div></div>`;
+            container.appendChild(qS);
+            const tS = document.createElement('div'); tS.id = `t-slide-${index+1}`; tS.className = `slide`;
+            tS.innerHTML = `<div class="tip-container text-center"><i class="fas fa-lightbulb text-4xl text-yellow-500 mb-6"></i><p class="text-lg text-gray-800 mb-10">${item.tip}</p><button onclick="nextSlide()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">Interessante! ✨</button></div>`;
+            container.appendChild(tS);
+        });
+    }
+
+    function handleAnswer(type) { scores[type]++; nextSlide(); }
+    function nextSlide() { flowIndex++; updateView(); }
+
+    function updateView() {
+        document.querySelectorAll('.slide').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
+        if (flowIndex === 0) {
+            const s0 = document.getElementById('slide-0'); s0.classList.add('active'); s0.style.display = 'flex';
+        } else if (flowIndex > (questions.length * 2)) {
+            const sl = document.getElementById('slide-loading'); sl.classList.add('active'); sl.style.display = 'flex';
+            calculateResult();
+        } else {
+            const isTip = flowIndex % 2 === 0;
+            const itemNum = Math.ceil(flowIndex / 2);
+            const target = document.getElementById(isTip ? `t-slide-${itemNum}` : `q-slide-${itemNum}`);
+            if(target) { target.classList.add('active'); target.style.display = 'flex'; }
+            document.getElementById('progressBar').style.width = (itemNum / questions.length * 100) + '%';
+        }
+    }
+
+    function calculateResult() {
+        let win = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        const p = profiles[win];
+        userProfile = p.title;
+        document.getElementById('profile-title').innerText = p.title;
+        document.getElementById('profile-desc').innerText = p.desc;
+        document.getElementById('ai-advice').innerText = p.advice;
+        document.getElementById('profile-icon').innerText = p.icon;
+        document.getElementById('hidden-result').value = p.title;
+        setTimeout(() => {
+            document.getElementById('slide-loading').style.display = 'none';
+            const sr = document.getElementById('slide-result');
+            sr.classList.add('active'); sr.style.display = 'flex';
+        }, 2000);
+    }
+
+    async function sendData() {
+        const btn = document.getElementById('submit-btn');
+        const form = document.getElementById('contact-form');
+        const nome = document.getElementById('nome').value;
+        const contatto = document.getElementById('contatto').value;
+
+        if (!nome || !contatto) {
+            alert("Per favore, inserisci nome e contatto!");
+            return;
+        }
+
+        btn.innerText = "INVIO IN CORSO..."; 
+        btn.disabled = true;
+
+        // Invio reale a Formspree tramite fetch (AJAX) per evitare redirect
+        const formData = new FormData(form);
+        
+        try {
+            const response = await fetch("https://formspree.io/f/xpqjkggk", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                document.getElementById('slide-result').style.display = 'none';
+                document.getElementById('slide-success').classList.add('active');
+                document.getElementById('slide-success').style.display = 'flex';
+            } else {
+                alert("Errore nell'invio. Riprova più tardi.");
+                btn.innerText = "CONTATTAMI (OFFRO IO IL CAFFÈ ☕)";
+                btn.disabled = false;
+            }
+        } catch (error) {
+            alert("Errore di connessione.");
+            btn.innerText = "CONTATTAMI (OFFRO IO IL CAFFÈ ☕)";
+            btn.disabled = false;
+        }
+    }
+
+    window.onload = initQuiz;
+</script>
+</body>
+</html>
