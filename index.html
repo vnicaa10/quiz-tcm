@@ -139,14 +139,16 @@
         </div>
 
         <form id="contact-form" class="space-y-4">
-            <input type="hidden" id="hidden-result" name="profilo_risultato">
-            
-            <input type="text" id="nome" name="nome" placeholder="Il tuo nome" required class="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="text" id="contatto" name="contatto" placeholder="WhatsApp o Mail" required class="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
-            <button type="button" id="submit-btn" onclick="sendData()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
-                CONTATTAMI (OFFRO IO IL CAFFÈ ☕)
-            </button>
-        </form>
+    <input type="hidden" name="_subject" id="email-subject" value="Nuovo contatto Quiz TCM">
+    
+    <input type="hidden" id="hidden-result" name="profilo_risultato">
+    <input type="text" id="nome" name="nome" placeholder="Il tuo nome" required class="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+    <input type="text" id="contatto" name="contatto" placeholder="WhatsApp o Mail" required class="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+    
+    <button type="button" id="submit-btn" onclick="sendData()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
+        CONTATTAMI (OFFRO IO IL CAFFÈ ☕)
+    </button>
+</form>
     </div>
 </div>
 
@@ -274,7 +276,7 @@
             alert("Per favore, inserisci nome e contatto!");
             return;
         }
-
+    document.getElementById('email-subject').value = "Nuovo contatto Quiz: " + nome;
         btn.innerText = "INVIO IN CORSO..."; 
         btn.disabled = true;
 
@@ -311,4 +313,5 @@
 </body>
 
 </html>
+
 
